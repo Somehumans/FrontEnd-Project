@@ -2,11 +2,17 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
+    font-family: 'Iceberg', 'Roboto',;
+}x
+
+.iceberg-regular {
+    font-family: "Iceberg", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+  }
 
 body {
-    background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+    background: linear-gradient(135deg, #091029, #2f2e2e, #100012);
     height: 100vh;
     display: flex;
     justify-content: center;
@@ -32,6 +38,7 @@ body {
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
     color: white;
     max-width: 600px;
+    height: 310px;
     z-index: 2;
     animation: fadeIn 1s ease-in;
 }
@@ -39,34 +46,38 @@ body {
 h1 {
     font-size: 4rem;
     margin-bottom: 1rem;
-    color: #fdbb2d;
-    text-shadow: 0 0 10px rgba(253, 187, 45, 0.7);
+    color: #6cd87c;
+    text-shadow: 0 0 10px rgba(94, 255, 108, 0.7);
 }
 
 p {
     font-size: 1.5rem;
     margin-bottom: 2rem;
     color: #e6e6e6;
+    margin-top: 5%;
+    font-family: 'Roboto' sans-serif;
 }
 
 .play-btn {
     display: inline-block;
     padding: 1rem 3rem;
-    background-color: #fdbb2d;
-    color: #1a2a6c;
+    background-color: #6cd87c;
+    color: #000000;
     font-size: 1.5rem;
     font-weight: bold;
     border: none;
     border-radius: 50px;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 0 10px rgba(253, 187, 45, 0.7);
+    box-shadow: 0 0 10px rgba(94, 255, 108, 0.7);
+    animation: float 3s ease-in-out infinite;
+    margin-top: 3%;
 }
 
 .play-btn:hover {
-    background-color: #ff9d00;
+    background-color: #a1e2b9;
     transform: scale(1.05);
-    box-shadow: 0 0 20px rgba(253, 187, 45, 0.9);
+    box-shadow: 0 0 20px rgba(20, 143, 43, 0.9);
 }
 
 @keyframes fadeIn {
@@ -80,6 +91,11 @@ p {
     100% { transform: translateY(0); }
 }
 
+@font-face {
+    font-family: Iceberg;
+    src: url(Iceberg-Regular.ttf);
+  }
+
 .floating {
-    animation: float 3s ease-in-out infinite;
+    animation: float 3s ease-in-out 1s;
 }
