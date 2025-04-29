@@ -35,9 +35,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         setTimeout(() => {
             playButton.style.transform = 'scale(1.05)';
-            alert('Starting game...');
-            // Here you would redirect to the actual game
-            // window.location.href = 'game.html';
+           window.location.href = 'game.html';
         }, 100);
     });
 });

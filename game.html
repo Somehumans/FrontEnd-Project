@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Naught Game</title>
+    <link rel="stylesheet" href="game.css">
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+    <div id="game-container">
+        <div id="score-display">Score: 0</div>
+        <div id="lives-display">Lives: 3</div>
+        <div id="level-display">Level: 1</div>
+        <div class="ship" id="player-ship"></div>
+
+        <div id="start-screen">
+            <h1>SPACE NAUGHT</h1>
+            <p>Type the letters on the asteroids to destroy them before they hit Earth!</p>
+            <button id="start-button">Start Game</button>
+        </div>
+
+        <div id="game-over">
+            <h1>GAME OVER</h1>
+            <p id="final-score">Your score: 0</p>
+            <button id="restart-button">Play Again</button>
+            <button id="end-game">Not Now</button>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
