@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Create particle effect
     const particlesContainer = document.getElementById('particles');
     
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < 120; i++) {
         createParticle();
     }
     
