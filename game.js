@@ -2,6 +2,7 @@
 let score = 0;
 let lives = 3;
 let level = 1;
+let tracker = 0;
 let asteroids = [];
 let gameActive = false;
 let asteroidSpeed = 2;
@@ -9,6 +10,7 @@ let spawnRate = 2000; // time between asteroid spawns
 let spawnTimer;
 let gameContainer = document.getElementById('game-container');
 let letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
 
 // DOM elements
 const scoreDisplay = document.getElementById('score-display');
@@ -137,18 +139,37 @@ function destroyAsteroid(index) {
     asteroid.element.remove();
     asteroids.splice(index, 1);
     
-
     score += 10 * level;
     updateScore();
     
 
-    if (score >= level * 100) {
+    
+if (score >= level * 100 && tracker <= 5) {
+    levelUp(); 
+  } 
+if (level >=5 && tracker <= 5) {
+    tracker += 1;
+}
+  // Only execute when tracker has reached 5
+  if (tracker >= 5 && tracker <= 20) {
+tracker += 1;
+  }
+  if (tracker >= 20 && tracker <= 23){
+    levelUp();
+    tracker += 1;
+  }
+  if (tracker >= 23 && tracker <= 35) {
+    tracker += 1;
+      }
+      if (tracker >= 35){
         levelUp();
-    }
+        tracker += 1;
+      }
 }
 
 // Level up
 function levelUp() {
+    if (score <= level * 200){
     level++;
     updateLevel();
     
@@ -159,6 +180,19 @@ function levelUp() {
     // Reset the spawn timer with new rate - needs to be fine tuned still
     clearInterval(spawnTimer);
     spawnTimer = setInterval(spawnAsteroid, spawnRate);
+    }
+    else if (score >= level * 210){
+        level++;
+    updateLevel();
+    
+    // Increasees difficulty over time - needs to be fine tuned still
+    asteroidSpeed += 0.1;
+    spawnRate = Math.max(300, spawnRate - 100);
+    
+    // Reset the spawn timer with new rate - needs to be fine tuned still
+    clearInterval(spawnTimer);
+    spawnTimer = setInterval(spawnAsteroid, spawnRate);
+    }
 }
 
 // Lose a life
@@ -232,7 +266,7 @@ window.addEventListener('load', function() {
   });
 
   const particles = [];
-  const ACCELERATION = 0.0004; // particles acceleration
+  const ACCELERATION = 0.0007; // particles acceleration
   
   // Create particles
   for (let i = 0; i < 120; i++) {
