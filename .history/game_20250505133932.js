@@ -246,10 +246,8 @@ function updateLevel() {
 document.addEventListener("keydown", checkKey);
 startButton.addEventListener("click", initGame);
 restartButton.addEventListener("click", initGame);
-endGameButton.addEventListener("click", function () {
-    window.location.href = "index.html";
-});
-
+//endGameButton.addEventListener('onclick', window.location.href = 'index.html');
+//^^^^^^ forces and instint reload for some reason
 window.addEventListener("load", function () {
     // This is to force the user back to the starting page
     if (performance.navigation && performance.navigation.type === 1) {
