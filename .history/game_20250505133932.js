@@ -246,11 +246,6 @@ function updateLevel() {
 document.addEventListener("keydown", checkKey);
 startButton.addEventListener("click", initGame);
 restartButton.addEventListener("click", initGame);
-endGameButton.addEventListener("click", function () {
-    startScreen.style.display = "block";
-    gameOverScreen.style.display = "none";
-});
-/*
 //endGameButton.addEventListener('onclick', window.location.href = 'index.html');
 //^^^^^^ forces and instint reload for some reason
 window.addEventListener("load", function () {
@@ -265,7 +260,6 @@ window.addEventListener("load", function () {
         }
     }
 });
-*/
 
 const particles = [];
 const ACCELERATION = 0.0007; // particles acceleration
