@@ -5,11 +5,18 @@ let level = 1;
 let tracker = 0;
 let asteroids = [];
 let gameActive = false;
-let asteroidSpeed = 2;
+let asteroidSpeed = 3;
 let spawnRate = 2000; // time between asteroid spawns
 let spawnTimer;
 let gameContainer = document.getElementById("game-container");
 let letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const MAX_ASTEROIDS = 4; // maximum number of asteroids at once
+let firstLetterHit = false; // Add this with other game variables at the top
+
+// Movement boundaries
+const MARGIN = 150; // increased margin from edges
+const MIN_BOTTOM = 20;
+const MAX_BOTTOM = gameContainer.offsetHeight - 200;
 
 // DOM elements
 const scoreDisplay = document.getElementById("score-display");
@@ -32,8 +39,19 @@ function initGame() {
     level = 1;
     asteroids = [];
     gameActive = true;
-    asteroidSpeed = 2;
+    asteroidSpeed = 3;
     spawnRate = 2000;
+    firstLetterHit = false; // Reset the flag
+
+    // Show and position the ship
+    playerShip.style.display = 'block';
+    playerShip.classList.remove('game-active'); // Remove game-active class if it exists
+    playerShip.classList.add('game-started');
+
+    // Add game-active class after initial animation
+    setTimeout(() => {
+        playerShip.classList.add('game-active');
+    }, 1500);
 
     updateScore();
     updateLives();
@@ -42,8 +60,10 @@ function initGame() {
     // Remove any existing asteroids
     document.querySelectorAll(".asteroid").forEach((a) => a.remove());
 
-    // Start spawning asteroids
-    spawnTimer = setInterval(spawnAsteroid, spawnRate);
+    // Start spawning asteroids with a delay to let ship animation complete
+    setTimeout(() => {
+        spawnTimer = setInterval(spawnAsteroid, spawnRate);
+    }, 1500);
 
     requestAnimationFrame(gameLoop);
 }
@@ -61,19 +81,27 @@ function gameLoop() {
 // Spawn a new asteroid
 function spawnAsteroid() {
     if (!gameActive) return;
+    
+    // Don't spawn if we already have max asteroids
+    if (asteroids.length >= MAX_ASTEROIDS) return;
 
     const asteroid = document.createElement("div");
     asteroid.className = "asteroid";
 
-    const left = Math.random() * (gameContainer.offsetWidth - 60);
-
+    // Ensure asteroids don't spawn too close to edges
+    const left = Math.random() * (gameContainer.offsetWidth - 2 * MARGIN) + MARGIN;
     const top = -60;
 
     asteroid.style.left = left + "px";
     asteroid.style.top = top + "px";
 
-    // Assign a random letter
-    const letter = letters.charAt(Math.floor(Math.random() * letters.length));
+    // Assign a random letter that isn't currently in use
+    let availableLetters = letters.split('').filter(letter => 
+        !asteroids.some(a => a.letter === letter)
+    );
+    if (availableLetters.length === 0) return; // Skip if no letters available
+    
+    const letter = availableLetters[Math.floor(Math.random() * availableLetters.length)];
     asteroid.textContent = letter;
     asteroid.dataset.letter = letter;
 
@@ -107,11 +135,46 @@ function checkKey(e) {
 
     const key = e.key.toUpperCase();
 
-    // verifiying the key pressed
+    // verifiying the key pressed for asteroids
     for (let i = 0; i < asteroids.length; i++) {
         if (asteroids[i].letter === key) {
-            destroyAsteroid(i);
+            // Move ship towards the asteroid horizontally only
+            const asteroid = asteroids[i];
+            const asteroidRect = asteroid.element.getBoundingClientRect();
+            const containerWidth = gameContainer.offsetWidth;
+            const containerHeight = gameContainer.offsetHeight;
 
+            // Calculate target position with stricter boundaries
+            const targetX = Math.min(
+                Math.max(asteroidRect.left, MARGIN),
+                containerWidth - MARGIN
+            );
+
+            // Limit movement to middle section of screen horizontally
+            const finalX = Math.max(
+                MARGIN,
+                Math.min(targetX, containerWidth - MARGIN)
+            );
+
+            // Calculate the bottom 30% boundary
+            const bottomThirtyPercent = containerHeight * 0.7;
+
+            // If this is the first letter hit, move up to the asteroid
+            if (!firstLetterHit) {
+                firstLetterHit = true;
+                playerShip.style.top = asteroidRect.top + 'px';
+                
+                // After a short delay, move to the bottom 30% of the screen
+                setTimeout(() => {
+                    playerShip.style.top = bottomThirtyPercent + 'px';
+                }, 500);
+            }
+
+            // Move ship horizontally
+            playerShip.style.left = finalX + 'px';
+            playerShip.style.transform = 'translateX(-50%)';
+
+            destroyAsteroid(i);
             break;
         }
     }
@@ -167,22 +230,22 @@ function levelUp() {
         level++;
         updateLevel();
 
-        // Increasees difficulty over time - needs to be fine tuned still
-        asteroidSpeed += 0.5;
+        // More gradual speed increase
+        asteroidSpeed += 0.2; // Reduced from 0.5
         spawnRate = Math.max(500, spawnRate - 200);
 
-        // Reset the spawn timer with new rate - needs to be fine tuned still
+        // Reset the spawn timer with new rate
         clearInterval(spawnTimer);
         spawnTimer = setInterval(spawnAsteroid, spawnRate);
     } else if (score >= level * 210) {
         level++;
         updateLevel();
 
-        // Increasees difficulty over time - needs to be fine tuned still
-        asteroidSpeed += 0.1;
+        // Even more gradual speed increase for higher levels
+        asteroidSpeed += 0.05; // Reduced from 0.1
         spawnRate = Math.max(300, spawnRate - 100);
 
-        // Reset the spawn timer with new rate - needs to be fine tuned still
+        // Reset the spawn timer with new rate
         clearInterval(spawnTimer);
         spawnTimer = setInterval(spawnAsteroid, spawnRate);
     }
@@ -195,22 +258,45 @@ function loseLife() {
 
     if (lives <= 0) {
         gameOver();
+    } else {
+        // Respawn effect
+        playerShip.classList.add('respawning');
+        
+        // Reset ship horizontal position only, maintain vertical position
+        playerShip.style.left = '50%';
+        playerShip.style.transform = 'translateX(-50%)';
+        
+        // Remove respawning class after animation
+        setTimeout(() => {
+            playerShip.classList.remove('respawning');
+        }, 3000);
     }
 }
 
-// Check for collisions between asteroids and ship - Not done yet
+// Check for collisions between asteroids and ship
 function checkCollisions() {
     const shipRect = playerShip.getBoundingClientRect();
+    
+    // Calculate a smaller hitbox (reduce by 60% of the original size)
+    const hitboxReduction = 0.6;
+    const hitboxWidth = shipRect.width * (1 - hitboxReduction);
+    const hitboxHeight = shipRect.height * (1 - hitboxReduction);
+    
+    // Center the smaller hitbox
+    const hitboxLeft = shipRect.left + (shipRect.width - hitboxWidth) / 2;
+    const hitboxTop = shipRect.top + (shipRect.height - hitboxHeight) / 2;
+    const hitboxRight = hitboxLeft + hitboxWidth;
+    const hitboxBottom = hitboxTop + hitboxHeight;
 
     for (let i = asteroids.length - 1; i >= 0; i--) {
         const asteroid = asteroids[i];
         const asteroidRect = asteroid.element.getBoundingClientRect();
 
         if (
-            shipRect.left < asteroidRect.right &&
-            shipRect.right > asteroidRect.left &&
-            shipRect.top < asteroidRect.bottom &&
-            shipRect.bottom > asteroidRect.top
+            hitboxLeft < asteroidRect.right &&
+            hitboxRight > asteroidRect.left &&
+            hitboxTop < asteroidRect.bottom &&
+            hitboxBottom > asteroidRect.top
         ) {
             // Collision detected
             loseLife();
@@ -224,6 +310,14 @@ function checkCollisions() {
 function gameOver() {
     gameActive = false;
     clearInterval(spawnTimer);
+    
+    // Hide the ship and remove classes
+    playerShip.style.display = 'none';
+    playerShip.classList.remove('game-started', 'game-active');
+    
+    // Remove all asteroids
+    asteroids.forEach(asteroid => asteroid.element.remove());
+    asteroids = [];
 
     document.getElementById("final-score").textContent = `Your score: ${score}`;
     gameOverScreen.style.display = "block";
@@ -231,15 +325,15 @@ function gameOver() {
 
 // Update displays
 function updateScore() {
-    scoreDisplay.textContent = `Score: ${score}`;
+    scoreDisplay.textContent = `SCORE: ${score}`;
 }
 
 function updateLives() {
-    livesDisplay.textContent = `Lives: ${lives}`;
+    livesDisplay.textContent = `LIVES: ${lives}`;
 }
 
 function updateLevel() {
-    levelDisplay.textContent = `Level: ${level}`;
+    levelDisplay.textContent = `LEVEL: ${level}`;
 }
 
 // Event listeners
@@ -247,20 +341,8 @@ document.addEventListener("keydown", checkKey);
 startButton.addEventListener("click", initGame);
 restartButton.addEventListener("click", initGame);
 endGameButton.addEventListener("click", function () {
-    window.location.href = "index.html";
-});
-
-window.addEventListener("load", function () {
-    // This is to force the user back to the starting page
-    if (performance.navigation && performance.navigation.type === 1) {
-        // Only redirect if not on index.html
-        if (
-            !window.location.pathname.endsWith("index.html") &&
-            window.location.pathname !== "/"
-        ) {
-            window.location.href = "/index.html";
-        }
-    }
+    // Instead of redirecting, just reload the current page
+    window.location.reload();
 });
 
 const particles = [];
