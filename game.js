@@ -140,23 +140,35 @@ function checkKey(e) {
             const asteroid = asteroids[i];
             const asteroidRect = asteroid.element.getBoundingClientRect();
             const containerWidth = gameContainer.offsetWidth;
-            
+            const containerHeight = gameContainer.offsetHeight;
+
             // Calculate target position with stricter boundaries
             const targetX = Math.min(
                 Math.max(asteroidRect.left, MARGIN),
                 containerWidth - MARGIN
             );
-            
-            // Limit movement to middle section of screen
+
+            // Limit movement to middle section of screen horizontally
             const finalX = Math.max(
                 MARGIN,
                 Math.min(targetX, containerWidth - MARGIN)
             );
-            
-            // Move ship horizontally only
+
+            // Calculate the bottom 30% boundary
+            const bottomThirtyPercent = containerHeight * 0.7; // This is the Y position where the bottom 30% begins
+
+            // Set vertical position to be in the bottom 30% of the screen
+            // Position will be somewhere between the 70% mark and the bottom (with some padding)
+            const finalY = Math.max(
+                bottomThirtyPercent,
+                Math.min(containerHeight - 100, asteroidRect.top) // Keep some padding from the bottom
+            );
+
+            // Move ship horizontally and ensure it stays in bottom 30%
             playerShip.style.left = finalX + 'px';
+            playerShip.style.top = finalY + 'px';
             playerShip.style.transform = 'translateX(-50%)';
-            
+
             destroyAsteroid(i);
             break;
         }
