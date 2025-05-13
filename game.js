@@ -11,6 +11,7 @@ let spawnTimer;
 let gameContainer = document.getElementById("game-container");
 let letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const MAX_ASTEROIDS = 4; // maximum number of asteroids at once
+let firstLetterHit = false; // Add this with other game variables at the top
 
 // Movement boundaries
 const MARGIN = 150; // increased margin from edges
@@ -40,6 +41,7 @@ function initGame() {
     gameActive = true;
     asteroidSpeed = 3;
     spawnRate = 2000;
+    firstLetterHit = false; // Reset the flag
 
     // Show and position the ship
     playerShip.style.display = 'block';
@@ -155,18 +157,21 @@ function checkKey(e) {
             );
 
             // Calculate the bottom 30% boundary
-            const bottomThirtyPercent = containerHeight * 0.7; // This is the Y position where the bottom 30% begins
+            const bottomThirtyPercent = containerHeight * 0.7;
 
-            // Set vertical position to be in the bottom 30% of the screen
-            // Position will be somewhere between the 70% mark and the bottom (with some padding)
-            const finalY = Math.max(
-                bottomThirtyPercent,
-                Math.min(containerHeight - 100, asteroidRect.top) // Keep some padding from the bottom
-            );
+            // If this is the first letter hit, move up to the asteroid
+            if (!firstLetterHit) {
+                firstLetterHit = true;
+                playerShip.style.top = asteroidRect.top + 'px';
+                
+                // After a short delay, move to the bottom 30% of the screen
+                setTimeout(() => {
+                    playerShip.style.top = bottomThirtyPercent + 'px';
+                }, 500);
+            }
 
-            // Move ship horizontally and ensure it stays in bottom 30%
+            // Move ship horizontally
             playerShip.style.left = finalX + 'px';
-            playerShip.style.top = finalY + 'px';
             playerShip.style.transform = 'translateX(-50%)';
 
             destroyAsteroid(i);
@@ -225,22 +230,22 @@ function levelUp() {
         level++;
         updateLevel();
 
-        // Increasees difficulty over time - needs to be fine tuned still
-        asteroidSpeed += 0.5;
+        // More gradual speed increase
+        asteroidSpeed += 0.2; // Reduced from 0.5
         spawnRate = Math.max(500, spawnRate - 200);
 
-        // Reset the spawn timer with new rate - needs to be fine tuned still
+        // Reset the spawn timer with new rate
         clearInterval(spawnTimer);
         spawnTimer = setInterval(spawnAsteroid, spawnRate);
     } else if (score >= level * 210) {
         level++;
         updateLevel();
 
-        // Increasees difficulty over time - needs to be fine tuned still
-        asteroidSpeed += 0.1;
+        // Even more gradual speed increase for higher levels
+        asteroidSpeed += 0.05; // Reduced from 0.1
         spawnRate = Math.max(300, spawnRate - 100);
 
-        // Reset the spawn timer with new rate - needs to be fine tuned still
+        // Reset the spawn timer with new rate
         clearInterval(spawnTimer);
         spawnTimer = setInterval(spawnAsteroid, spawnRate);
     }
